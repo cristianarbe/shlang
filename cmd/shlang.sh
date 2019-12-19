@@ -2,6 +2,14 @@
 
 set -e
 
+fn_get(){
+  url_orig="$1"
+  url="$(echo $url_orig | sed 's/https:\/\///g')"
+  cd "$SHPATH"/src || exit
+  mkdir -p "$url"
+  git clone "$url_orig" "$url"
+}
+
 fn_run() {
   if ! shellcheck "$1"; then
     exit 1
@@ -17,6 +25,12 @@ fn_install() {
 
   filename="$(basename "$1")"
   filename="${filename%.*}"
+
+  if test -z "$SHPATH"; then
+    echo "SHPATH is not set!"
+    exit 1
+  fi
+
   binpath="$SHPATH"/bin/"$filename"
 
   if test -L "$binpath"; then
@@ -30,7 +44,7 @@ fn_install() {
 
 main() {
   case "$1" in
-  run | install)
+  run | install | get)
     fn_"$1" "$2"
     ;;
   *)
